@@ -1,24 +1,20 @@
-import '@rainbow-me/rainbowkit/styles.css';
+import { ConnectKitProvider } from 'connectkit';
 
 import { WagmiConfig } from 'wagmi';
-import { chains, wagmiConfig } from '@/libs/web3';
-import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import { wagmiConfig } from '@/libs/web3';
 
 import Header from './components/Header';
+import Login from './components/Login';
 
 function App() {
   return (
     <WagmiConfig config={wagmiConfig}>
-      <RainbowKitProvider chains={chains}>
-        <div className="App">
-          <Header />
-          <header className="App-header">
-            <p>
-              Edit <code>src/App.tsx</code> and save to reload.
-            </p>
-          </header>
+      <ConnectKitProvider>
+        <Header />
+        <div className="container">
+          <Login />
         </div>
-      </RainbowKitProvider>
+      </ConnectKitProvider>
     </WagmiConfig>
   );
 }

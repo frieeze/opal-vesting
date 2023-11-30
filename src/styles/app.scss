@@ -1,6 +1,4 @@
-@import "utils/breakpoints.scss";
-@import "utils/spacing.scss";
-@import "utils/theme.scss";
+@import "base";
 
 // RESET & GLOBAL //
 :root {
@@ -27,4 +25,9 @@ html {
 }
 input {
     color: $text;
+}
+
+.container {
+    margin: $spacing-xl auto 0 auto;
+    max-width: 350px;
 }

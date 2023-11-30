@@ -1,6 +1,6 @@
 import { configureChains, createConfig } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
-import { getDefaultWallets } from '@rainbow-me/rainbowkit';
+import { getDefaultConfig } from 'connectkit';
 
 import { publicProvider } from 'wagmi/providers/public';
 import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
@@ -17,16 +17,11 @@ const { chains, publicClient } = configureChains(
   ],
 );
 
-const { connectors } = getDefaultWallets({
-  appName: 'Opal vesting',
-  projectId: WALLET_CONNECT_ID,
-  chains,
-});
-
-const wagmiConfig = createConfig({
-  autoConnect: true,
-  connectors,
-  publicClient,
-});
-
-export { chains, wagmiConfig };
+export const wagmiConfig = createConfig(
+  getDefaultConfig({
+    chains,
+    publicClient,
+    walletConnectProjectId: WALLET_CONNECT_ID,
+    appName: 'Opal vesting',
+  }),
+);
