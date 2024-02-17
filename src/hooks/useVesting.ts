@@ -1,13 +1,7 @@
-import React from 'react';
-
 import { useContractReads } from 'wagmi';
-import { Address, getAddress } from 'viem';
+import { Address } from 'viem';
 
-import { vestingContract } from '@/constants';
 import vestingABI from '@/abi/vesting';
-import { useSetAtom } from 'jotai';
-import { error } from '@/atoms/atoms';
-import { Vesting } from '@/types';
 
 const calls = [
   'beneficiaries',
@@ -17,76 +11,94 @@ const calls = [
   'lockedAmount',
   'totalReleasedAmount',
   'releasableAmount',
+  'accepted',
+  'revoked',
 ];
 
-const useVesting = (user: Address) => {
-  const setError = useSetAtom(error);
 
-  const { data, isError, isLoading, isSuccess } = useContractReads({
+type UseVesting = (contract: Address, user: Address) => {
+  isLoading: boolean,
+  error: string | null,
+  start: number;
+  duration: number;
+  cliff: number;
+  total: bigint;
+  claimed: bigint;
+  claimable: bigint;
+  accepted: boolean;
+  revoked: boolean;
+}
+
+const useVesting: UseVesting = (contract: Address, user: Address) => {
+  const { data, isError, isLoading } = useContractReads({
     contracts: calls.map((fn) => ({
-      address: getAddress(vestingContract),
+      address: contract,
       abi: vestingABI,
       functionName: fn,
       args: [user],
     })),
   });
 
-  React.useEffect(() => {
+  const hasVesting = (data?.[0]?.result as boolean) ?? false;
+  function setError(): string | null {
     if (isLoading) {
-      setError(null);
-      return;
+      return null;
     }
     if (isError) {
-      setError('Unable to fetch vesting information');
       console.log('error', isError);
       console.log('data', data);
-      return;
+      return 'Unable to fetch vesting information';
+
     }
     for (const res of data ?? []) {
       if (res.error) {
         console.error(res.error.message);
-        setError('Unable to fetch vesting information');
-        return;
+        return 'Unable to fetch vesting information';
       }
     }
-    setError(null);
-  }, [isError, isLoading, isSuccess, setError, data]);
 
-  const vesting: Vesting = (() => {
+    if (!hasVesting) {
+      return `No vesting for this address on ${contract}`;
+    }
+
+    return null
+  }
+
+  const error = setError();
+
+  const vesting = (() => {
     const novest = {
-      user,
-      hasVesting: false,
-    } as const;
+      start: 0,
+      duration: 0,
+      cliff: 0,
+      total: 0n,
+      claimed: 0n,
+      claimable: 0n,
+      accepted: false,
+      revoked: false,
+    }
+
     if (data === undefined || isError || isLoading) {
       return novest;
     }
 
-    const hasVesting = (data[0]?.result as boolean) ?? false;
 
     if (!hasVesting) {
       return novest;
     }
-
-    const start = Number(data[1]?.result ?? 0);
-    const duration = Number(data[2]?.result ?? 0);
-    const cliff = Number(data[3]?.result ?? 0);
-    const total = (data[4]?.result as bigint) ?? 0n;
-    const claimed = (data[5]?.result as bigint) ?? 0n;
-    const claimable = (data[6]?.result as bigint) ?? 0n;
-
     return {
-      user,
-      hasVesting,
-      start,
-      duration,
-      cliff,
-      total,
-      claimed,
-      claimable,
-    };
+      start: Number(data[1]?.result ?? 0),
+      duration: Number(data[2]?.result ?? 0),
+      cliff: Number(data[3]?.result ?? 0),
+      total: (data[4]?.result as bigint) ?? 0n,
+      claimed: (data[5]?.result as bigint) ?? 0n,
+      claimable: (data[6]?.result as bigint) ?? 0n,
+      accepted: !!(data[7]?.result),
+      revoked: !!(data[8]?.result),
+    }
   })();
 
-  return { vesting, isLoading, isError };
+  return { ...vesting, isLoading, error };
 };
 
 export default useVesting;

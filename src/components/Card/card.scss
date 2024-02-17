@@ -1,0 +1,28 @@
+@import "src/styles/base.scss";
+
+.card {
+    display: flex;
+    align-items: center;
+    background-color: $paper;
+
+    border-radius: $border-radius-m;
+    border: 0.15rem solid;
+    border-color: $paper-light;
+
+    max-width: 100%;
+    padding: $spacing-l;
+
+    flex-direction: column;
+    justify-content: center;
+
+    &.error {
+        border-color: $error;
+    }
+
+    .card__title {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: $spacing-m;
+        color: $primary;
+    }
+}

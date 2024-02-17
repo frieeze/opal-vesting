@@ -1,14 +1,13 @@
 import { atom } from 'jotai';
-import { Vesting } from '@/types';
 
-import { AddressZero } from '@/constants';
+export enum CardState {
+  Loading = 'info',
+  Error = 'error',
+  Success = 'success',
 
-export const error = atom<string | null>(null);
+}
 
-export const userVesting = atom<Vesting>({
-  user: AddressZero,
-  hasVesting: false,
-});
+export const cardStateAtom = atom<CardState>(CardState.Loading);
 
 // {
 //     user: '0x3Dbf0047dd16BfEC26b18419be6F36382e383852',

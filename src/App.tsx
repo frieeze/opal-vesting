@@ -6,10 +6,12 @@ import { wagmiConfig } from '@/libs/web3';
 import Header from './components/Header';
 import Login from './components/Login';
 
+import ccTheme from '@/utils/connect-theme';
+
 function App() {
   return (
     <WagmiConfig config={wagmiConfig}>
-      <ConnectKitProvider>
+      <ConnectKitProvider theme="auto" mode="dark" customTheme={ccTheme}>
         <Header />
         <div className="container">
           <Login />

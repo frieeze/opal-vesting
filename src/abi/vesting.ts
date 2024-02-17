@@ -2,7 +2,7 @@ export default [
   {
     inputs: [
       { internalType: 'address', name: '_admin', type: 'address' },
-      { internalType: 'address', name: '_palAddress', type: 'address' },
+      { internalType: 'address', name: '_tokenAddress', type: 'address' },
     ],
     stateMutability: 'nonpayable',
     type: 'constructor',
@@ -17,6 +17,15 @@ export default [
     anonymous: false,
     inputs: [{ indexed: true, internalType: 'address', name: 'beneficiary', type: 'address' }],
     name: 'LockCanceled',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, internalType: 'address', name: 'previousOwner', type: 'address' },
+      { indexed: true, internalType: 'address', name: 'newOwner', type: 'address' },
+    ],
+    name: 'OwnershipTransferStarted',
     type: 'event',
   },
   {
@@ -47,6 +56,13 @@ export default [
     type: 'event',
   },
   { inputs: [], name: 'acceptLock', outputs: [], stateMutability: 'nonpayable', type: 'function' },
+  {
+    inputs: [],
+    name: 'acceptOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
   {
     inputs: [{ internalType: 'address', name: '', type: 'address' }],
     name: 'accepted',
@@ -112,8 +128,8 @@ export default [
   },
   {
     inputs: [],
-    name: 'pal',
-    outputs: [{ internalType: 'contract IERC20', name: '', type: 'address' }],
+    name: 'pendingOwner',
+    outputs: [{ internalType: 'address', name: '', type: 'address' }],
     stateMutability: 'view',
     type: 'function',
   },
@@ -167,6 +183,13 @@ export default [
     inputs: [{ internalType: 'address', name: '', type: 'address' }],
     name: 'start',
     outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'token',
+    outputs: [{ internalType: 'contract IERC20', name: '', type: 'address' }],
     stateMutability: 'view',
     type: 'function',
   },
