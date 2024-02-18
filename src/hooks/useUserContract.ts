@@ -1,7 +1,7 @@
 import { Address } from 'viem';
 import { useContractReads } from 'wagmi'
 
-import { vestingContracts } from '@/constants';
+import { VestingContracts } from '@/constants';
 import vestingABI from '@/abi/vesting';
 import { useMemo } from 'react';
 
@@ -13,7 +13,7 @@ type UseUserContract = (user: Address) => {
 
 const useUserContract: UseUserContract = (user: Address) => {
     const { data, isError, isLoading } = useContractReads({
-        contracts: vestingContracts.map((vc) => ({
+        contracts: VestingContracts.map((vc) => ({
             address: vc,
             abi: vestingABI,
             functionName: 'beneficiaries',
@@ -22,7 +22,7 @@ const useUserContract: UseUserContract = (user: Address) => {
     });
 
     const userContracts = useMemo(() => {
-        return vestingContracts.filter((_, i) => !!data?.[i]?.result)
+        return VestingContracts.filter((_, i) => !!data?.[i]?.result)
     }, [data])
 
     function error() {
