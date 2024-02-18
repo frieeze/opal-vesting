@@ -1,32 +1,40 @@
 import { Address } from "viem";
+import { useWriteContract } from "wagmi"
 
+import vestingABI from '@/abi/vesting';
 
 
 type UseTx = (contract: Address, user: Address) => {
-    isLoading: boolean;
+    status: "error" | "pending" | "idle" | "success";
     error: string | null;
     claim: () => Promise<void>;
     accept: () => Promise<void>;
 }
 
-const useTx: UseTx = (contract, user) => {
+const useTx: UseTx = (contract) => {
+    const { status, writeContract } = useWriteContract();
+    async function executeTx(fn: 'acceptLock' | 'release') {
+        await writeContract({
+            address: contract,
+            abi: vestingABI,
+            functionName: fn,
+        })
 
-    async function executeTx(fn: string) {
-        console.log('executeTx', fn);
     }
 
     async function claim() {
-        return executeTx('claim');
+        return executeTx('release');
     }
 
     async function accept() {
-        return executeTx('accept');
+        return executeTx('acceptLock');
     }
     return {
-        isLoading: false,
+        status,
         error: null,
         claim,
         accept
+
     }
 }
 

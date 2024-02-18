@@ -1,27 +1,19 @@
-import { configureChains, createConfig } from 'wagmi';
+import { createConfig } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { getDefaultConfig } from 'connectkit';
 
-import { publicProvider } from 'wagmi/providers/public';
-import { jsonRpcProvider } from 'wagmi/providers/jsonRpc';
-
 import { MAINNET_RPC, WALLET_CONNECT_ID } from '@/constants/env';
+import { http } from 'viem';
 
-const { chains, publicClient } = configureChains(
-  [mainnet],
-  [
-    jsonRpcProvider({
-      rpc: () => ({ http: MAINNET_RPC }),
-    }),
-    publicProvider(),
-  ],
-);
 
 export const wagmiConfig = createConfig(
-  getDefaultConfig({
-    chains,
-    publicClient,
-    walletConnectProjectId: WALLET_CONNECT_ID,
-    appName: 'Opal vesting',
-  }),
+    getDefaultConfig({
+        chains: [mainnet],
+        transports: {
+            [mainnet.id]: http(MAINNET_RPC),
+        },
+        walletConnectProjectId: WALLET_CONNECT_ID,
+        appName: 'Opal vesting',
+        appUrl: '/favicon.png',
+    }),
 );

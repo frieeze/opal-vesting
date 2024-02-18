@@ -1,7 +1,7 @@
 import './vesting.scss';
 import React, { useEffect } from 'react';
 import { useSetAtom } from 'jotai';
-import { Address } from 'wagmi';
+import { Address } from 'viem';
 
 import { formatDate, prettierNumber } from '@/utils';
 import { CardState, cardStateAtom } from '@/atoms/atoms';
@@ -9,37 +9,44 @@ import useVesting from '@/hooks/useVesting';
 import useUserContract from '@/hooks/useUserContract';
 import useTx from '@/hooks/useTx';
 
-import Loader from './Loader.svg';
 import Card from '../Card';
+
+const Spinner: React.FC<{ size?: string }> = ({ size = '1em' }) => (
+  <svg
+    className="loading__spinner"
+    style={{
+      width: size,
+      height: size,
+      verticalAlign: 'middle',
+      fill: 'currentColor',
+    }}
+    viewBox="0 0 1024 1024"
+    version="1.1"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M512.511 21.483c-271.163 0-491.028 219.86-491.028 491.028 0 271.173 219.856 491.03 491.028 491.03 26.554 0 48.08-21.527 48.08-48.08 0-26.554-21.526-48.08-48.08-48.08-218.065 0-394.869-176.804-394.869-394.87 0-218.06 176.813-394.869 394.87-394.869 218.065 0 394.869 176.804 394.869 394.87 0 26.553 21.526 48.08 48.08 48.08 26.553 0 48.08-21.527 48.08-48.08 0-271.173-219.857-491.03-491.03-491.03z" />
+  </svg>
+);
 
 type LoadingButtonProps = {
   isLoading: boolean;
+  disabled?: boolean;
   title: string;
   onClick: () => void;
 };
 
-const LoadingButton: React.FC<LoadingButtonProps> = ({ isLoading, title, onClick }) => {
+const LoadingButton: React.FC<LoadingButtonProps> = ({ isLoading, disabled, title, onClick }) => {
   if (!isLoading) {
-    return <button onClick={onClick}>{title}</button>;
+    return (
+      <button className={disabled ? 'disabled' : ''} onClick={onClick}>
+        {title}
+      </button>
+    );
   }
 
   return (
     <button className="loading">
-      <svg
-        className="svg-icon"
-        style={{
-          width: '1em',
-          height: '1em',
-          verticalAlign: 'middle',
-          fill: 'currentColor',
-          overflow: 'hidden',
-        }}
-        viewBox="0 0 1024 1024"
-        version="1.1"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path d="M512.511 21.483c-271.163 0-491.028 219.86-491.028 491.028 0 271.173 219.856 491.03 491.028 491.03 26.554 0 48.08-21.527 48.08-48.08 0-26.554-21.526-48.08-48.08-48.08-218.065 0-394.869-176.804-394.869-394.87 0-218.06 176.813-394.869 394.87-394.869 218.065 0 394.869 176.804 394.869 394.87 0 26.553 21.526 48.08 48.08 48.08 26.553 0 48.08-21.527 48.08-48.08 0-271.173-219.857-491.03-491.03-491.03z" />
-      </svg>
+      <Spinner size="1.2em" />
     </button>
   );
 };
@@ -81,16 +88,43 @@ const LoadErrorHandler: React.FC<LoadErrorHandlerProps> = ({ error, isLoading, c
 
   return (
     <Card>
-      {isLoading ? <div className="loading">Loading...</div> : <div className="error">{error}</div>}
+      {!isLoading ? (
+        <div className="loading">
+          <Spinner size="2em" />
+          <p>Loading...</p>
+        </div>
+      ) : (
+        <div className="error">{error}</div>
+      )}
     </Card>
   );
 };
 
 const VestingCard: React.FC<{ contract: Address; user: Address }> = ({ contract, user }) => {
-  const { isLoading, error, claimable, claimed, cliff, duration, start, total, accepted, revoked } =
-    useVesting(contract, user);
-  const { claim, accept, isLoading: txLoading } = useTx(contract, user);
+  const {
+    isLoading,
+    error,
+    claimable,
+    claimed,
+    cliff,
+    duration,
+    start,
+    total,
+    accepted,
+    revoked,
+    refetch,
+  } = useVesting(contract, user);
+  const { claim, accept, status } = useTx(contract, user);
 
+  useEffect(() => {
+    if (status === 'success') {
+      refetch();
+    }
+  }, [refetch, status]);
+
+  const txLoading = status === 'pending';
+
+  const cliffNotPassed = (start + cliff) * 1000 > Date.now();
   return (
     <LoadErrorHandler error={error} isLoading={isLoading}>
       <Card>
@@ -107,14 +141,15 @@ const VestingCard: React.FC<{ contract: Address; user: Address }> = ({ contract,
             <button className="disabled">Vesting Revoked</button>
           ) : accepted ? (
             <LoadingButton
-              title={`Claim ${prettierNumber(claimable)} GEM`}
+              title={
+                cliffNotPassed ? 'Cliff period not over' : `Claim ${prettierNumber(claimable)} GEM`
+              }
               isLoading={txLoading}
+              disabled={claimable === 0n || cliffNotPassed}
               onClick={claim}
             />
           ) : (
-            <button onClick={accept} disabled={txLoading}>
-              Accept Vesting
-            </button>
+            <LoadingButton title="Accept Vesting" isLoading={txLoading} onClick={accept} />
           )}
         </div>
       </Card>

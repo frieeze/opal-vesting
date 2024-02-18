@@ -1,23 +1,28 @@
 import { ConnectKitProvider } from 'connectkit';
 
-import { WagmiConfig } from 'wagmi';
+import { WagmiProvider } from 'wagmi';
 import { wagmiConfig } from '@/libs/web3';
 
 import Header from './components/Header';
 import Login from './components/Login';
 
-import ccTheme from '@/utils/connect-theme';
+import ckTheme from '@/utils/connect-theme';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
 
 function App() {
   return (
-    <WagmiConfig config={wagmiConfig}>
-      <ConnectKitProvider theme="auto" mode="dark" customTheme={ccTheme}>
-        <Header />
-        <div className="container">
-          <Login />
-        </div>
-      </ConnectKitProvider>
-    </WagmiConfig>
+    <WagmiProvider config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        <ConnectKitProvider theme="auto" mode="dark" customTheme={ckTheme}>
+          <Header />
+          <div className="container">
+            <Login />
+          </div>
+        </ConnectKitProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }
 

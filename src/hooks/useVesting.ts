@@ -1,4 +1,4 @@
-import { useContractReads } from 'wagmi';
+import { useReadContracts } from 'wagmi';
 import { Address } from 'viem';
 
 import vestingABI from '@/abi/vesting';
@@ -27,10 +27,11 @@ type UseVesting = (contract: Address, user: Address) => {
   claimable: bigint;
   accepted: boolean;
   revoked: boolean;
+  refetch: () => void;
 }
 
 const useVesting: UseVesting = (contract: Address, user: Address) => {
-  const { data, isError, isLoading } = useContractReads({
+  const { data, isError, isLoading, refetch } = useReadContracts({
     contracts: calls.map((fn) => ({
       address: contract,
       abi: vestingABI,
@@ -39,20 +40,18 @@ const useVesting: UseVesting = (contract: Address, user: Address) => {
     })),
   });
 
-  const hasVesting = (data?.[0]?.result as boolean) ?? false;
+
+  const hasVesting = (data?.[0]?.result as unknown as boolean) ?? false;
   function setError(): string | null {
     if (isLoading) {
       return null;
     }
     if (isError) {
-      console.log('error', isError);
-      console.log('data', data);
       return 'Unable to fetch vesting information';
 
     }
     for (const res of data ?? []) {
       if (res.error) {
-        console.error(res.error.message);
         return 'Unable to fetch vesting information';
       }
     }
@@ -90,15 +89,15 @@ const useVesting: UseVesting = (contract: Address, user: Address) => {
       start: Number(data[1]?.result ?? 0),
       duration: Number(data[2]?.result ?? 0),
       cliff: Number(data[3]?.result ?? 0),
-      total: (data[4]?.result as bigint) ?? 0n,
-      claimed: (data[5]?.result as bigint) ?? 0n,
-      claimable: (data[6]?.result as bigint) ?? 0n,
+      total: (data[4]?.result as unknown as bigint) ?? 0n,
+      claimed: (data[5]?.result as unknown as bigint) ?? 0n,
+      claimable: (data[6]?.result as unknown as bigint) ?? 0n,
       accepted: !!(data[7]?.result),
       revoked: !!(data[8]?.result),
     }
   })();
 
-  return { ...vesting, isLoading, error };
+  return { ...vesting, isLoading, error, refetch };
 };
 
 export default useVesting;
