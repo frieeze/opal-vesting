@@ -1,3 +1,4 @@
+import './login.scss';
 import React, { useEffect } from 'react';
 import { useSetAtom } from 'jotai';
 import { useAccount } from 'wagmi';
@@ -19,9 +20,11 @@ const Login: React.FC = () => {
   }
   return (
     <Card>
-      <h2 className="card__title">Opal Vesting</h2>
-      <p className="text-center">Connect a wallet to continue</p>
-      <ConnectKitButton />
+      <div className="login">
+        <h2 className="login__title">Opal DeFi Vesting</h2>
+        <p className="login_text">Connect a wallet to continue</p>
+        <ConnectKitButton />
+      </div>
     </Card>
   );
 };

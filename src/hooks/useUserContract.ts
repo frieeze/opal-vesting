@@ -22,7 +22,7 @@ const useUserContract: UseUserContract = (user: Address) => {
     });
 
     const userContracts = useMemo(() => {
-        return vestingContracts.filter((_, i) => !!data?.[i]?.result ?? false)
+        return vestingContracts.filter((_, i) => !!data?.[i]?.result)
     }, [data])
 
     function error() {
