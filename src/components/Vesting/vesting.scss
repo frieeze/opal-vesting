@@ -79,7 +79,11 @@
     justify-content: center;
     gap: $spacing-m;
     padding: $spacing-xl;
-    width: 100%;
+    min-width: 15em;
+}
+
+.card > .error {
+    padding: $spacing-xl;
 }
 
 .loading__spinner {

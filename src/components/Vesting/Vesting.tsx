@@ -88,7 +88,7 @@ const LoadErrorHandler: React.FC<LoadErrorHandlerProps> = ({ error, isLoading, c
 
   return (
     <Card>
-      {!isLoading ? (
+      {isLoading ? (
         <div className="loading">
           <Spinner size="2em" />
           <p>Loading...</p>
