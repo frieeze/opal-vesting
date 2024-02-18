@@ -2,6 +2,7 @@ import { Address } from "viem";
 import { useWriteContract } from "wagmi"
 
 import vestingABI from '@/abi/vesting';
+import { toast } from 'react-toastify';
 
 
 type UseTx = (contract: Address, user: Address) => {
@@ -12,12 +13,18 @@ type UseTx = (contract: Address, user: Address) => {
 }
 
 const useTx: UseTx = (contract) => {
-    const { status, writeContract } = useWriteContract();
+    const { status, writeContractAsync } = useWriteContract();
     async function executeTx(fn: 'acceptLock' | 'release') {
-        await writeContract({
+        const promise = writeContractAsync({
             address: contract,
             abi: vestingABI,
             functionName: fn,
+        })
+
+        toast.promise(promise, {
+            pending: `Sending transaction...`,
+            success: `Transaction sent successfully`,
+            error: `Transaction failed`
         })
 
     }
